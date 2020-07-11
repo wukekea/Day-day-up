@@ -86,6 +86,12 @@ c := 11
 
 // 数组初始化，d = {1, 2, 0, 0, 0}
 d := [5]int{1, 2}
+var e = [5]int{1, 2, 3, 4, 5}
+var f = [3][4]int{  
+ {0, 1, 2, 3} ,   /*  第一行索引为 0 */
+ {4, 5, 6, 7} ,   /*  第二行索引为 1 */
+ {8, 9, 10, 11}   /*  第三行索引为 2 */
+}
 ```
 
 #### 多变量的声明
@@ -390,5 +396,102 @@ func main(){
 	* 未定义类型，包括各种未命名的组合类型。如果一个未命名类型内嵌了一个其他的有方法的类型，编译器将明确的为这个匿名类型和其指针声明响应的方法。
 * 方法声明类似于函数声明，但它有一个额外的参数声明部分。额外部分能包含并且仅能包含一个这个方法的接受者类型的参数。这个唯一的接受者参数被称为方法声明的接受者参数。接受者参数必须被()括住，并且声明在func和函数名称之间。
 ```golang
+// Age and int are two distinct types. We can't declare
+// methods for int and *int, but can for Age and *Age.
+type Age int
+func (age Age) LargerThan(a Age) bool {
+    return age > a
+}
+func (age *Age) Increase() {
+    *age++
+}
 
+// Receiver of custom defined function type.
+type FilterFunc func(in int) bool
+func (ff FilterFunc) Filte(in int) bool {
+    return ff(in)
+}
+
+// Receiver of custom defined map type.
+type StringSet map[string]struct{}
+func (ss StringSet) Has(key string) bool {
+    _, present := ss[key]
+    return present
+}
+func (ss StringSet) Add(key string) {
+    ss[key] = struct{}{}
+}
+func (ss StringSet) Remove(key string) {
+    delete(ss, key)
+}
+
+// Receiver of custom defined struct type.
+type Book struct {
+    pages int
+}
+func (b Book) Pages() int {
+    return b.pages
+}
+func (b *Book) SetPages(pages int) {
+    b.pages = pages
+}
 ```
+### Go语言中的指针
+* nil为Go语言中的空指针
+```golang
+// Go语言中的指针定义方法
+var ptr *int
+```
+* Go语言指针数组
+```golang
+var ptr [3]*int
+```
+### Go语言结构体
+* 结构体的定义如下：
+```golang
+// 结构体的定义
+type struct_variable_type struct {
+   member definition;
+   member definition;
+   ...
+   member definition;
+}
+
+// 结构体的使用
+variable_name := structure_variable_type {value1, value2...valuen}
+```
+```golang
+package main
+
+import (
+   "fmt"
+)
+
+type Book struct {
+	title string
+	price int
+	author string
+}
+
+func main(){
+	var book Book
+	book.title = "三体"
+	book.price = 30
+	book.author = "刘慈欣"
+
+	fmt.Println(book)			// {三体 30 刘慈欣}
+	fmt.Println(book.title)		// 三体
+
+	var bookptr *Book = &book
+	fmt.Println(bookptr)		// &{三体 30 刘慈欣}
+	fmt.Println(*bookptr)		// {三体 30 刘慈欣}
+	fmt.Println(bookptr.title)	// 三体
+	fmt.Println(bookptr.title)	// 报错
+	fmt.Println((*bookptr).title)	// 三体
+
+	book1 := Book{"西游记", 20, "吴承恩"}
+	fmt.Println(book1)
+}
+```
+
+# 方法，select语句
