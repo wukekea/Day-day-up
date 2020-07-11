@@ -159,3 +159,205 @@ func main() {
 	fmt.Println(b, c, g, d, e, f, h, i, j, k)
 }
 ```
+### go语言运算符
+* 位运算符：对整数在内存中的二进制位进行操作。位运算符 &, |, 和 ^ 的计算法制如下：
+
+|p	|q	|p & q	|p \| q	|p ^ q	|
+|---|---|---	|---	|---	|
+|0	|0	|0		|0		|0		|
+|0	|1	|0		|1		|1		|
+|1	|1	|1		|1		|0		|
+|1	|0	|0		|1		|1		|
+* 假定 A 为60，B 为13,运算符如下表所示：
+
+|运算符		|描述					|实例	|
+|-----		|---					|---	|
+|&	|按位与运算符"&"是双目运算符。<br>其功能是参与运算的两数各对应的二进位相与。|(A & B) 结果为 12, 二进制为 0000 1100|
+|\|	|按位或运算符"|"是双目运算符。<br>其功能是参与运算的两数各对应的二进位相或	|(A | B) 结果为 61, 二进制为 0011 1101|
+|^	|按位异或运算符"^"是双目运算符。<br>其功能是参与运算的两数各对应的二进位相异或，当两对应的二进位相异时，结果为1。|(A ^ B) 结果为 49, 二进制为 0011 0001|
+|<<	|左移运算符"<<"是双目运算符。左移n位就是乘以2的n次方。<br>其功能把"<<"左边的运算数的各二进位全部左移若干位，由"<<"右边的数指定移动的位数，高位丢弃，低位补0。	|A << 2 结果为 240 ，二进制为 1111 0000|
+|>>	|右移运算符">>"是双目运算符。右移n位就是除以2的n次方。<br>其功能是把">>"左边的运算数的各二进位全部右移若干位，">>"右边的数指定移动的位数。|A >> 2 结果为 15 ，二进制为 0000 1111|
+
+```golang
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+	// a与b的数据类型必须相同，否则将会报错
+	var a uint8 = 60
+	var b uint8 = 13
+	var c = a & b 		// c = 12
+	var d = a << 2 		// d = 240
+	var e = a << 3 		// e = 224
+
+	fmt.Println(c, d, e)
+}
+```
+### Go语言中的条件语句
+* Go语言中的条件语句包括`if…………else`语句、`switch`语句以及`select`语句等。
+
+#### Go语言switch语句
+* switch 语句执行的过程从上至下，直到找到匹配项，匹配项后面不需要像C++语言一样再加break。示例如下：
+```golang
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+	var a int = 15
+	switch a {
+	case 5:
+		fmt.Println("a == 5")
+		fmt.Println("end without break")
+	case 10:
+		fmt.Println("a == 10")
+		fmt.Println("end without break")
+	case 15:
+		fmt.Println("a == 15")
+		fmt.Println("end without break")
+	case 20:
+		fmt.Println("a == 10")
+		fmt.Println("end without break")
+	default:
+		fmt.Println("no match")
+	}
+}
+```
+* switch 语句还可以被用于 type-switch 来判断某个 interface 变量中实际存储的变量类型。
+```golang
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+	var a interface{}
+	// a必须是一个接口类型的变量，而所有的case语句后面跟的类型必须实现了a的接口类型。
+	switch a.(type) {	
+	case nil:	  
+        fmt.Printf(" x 的类型 :nil") 
+	case int:
+		fmt.Println("x 的类型是 int型")
+	case float32:
+		fmt.Println("x 的类型是 float型")
+	default:
+		fmt.Println("wrong")
+	}
+}
+```
+#### Go语言select语句
+* select语句属于条件分支流程控制方法，不过它只能用于通道。它可以包含若干条case语句，并根据条件选择其中的一个执行。进一步说，select语句中的case关键字只能后跟用于通道的发送操作的表达式以及接收操作的表达式或语句。注意事项：
+	* 每个case都必须是一个通信
+	* 所有channel表达式都会被求值
+	* 所有被发送的表达式都会被求值
+	* 如果任意某个通信可以进行，它就执行；其他被忽略。
+	* 如果有多个case都可以运行，Select会随机公平地选出一个执行。其他不会执行。
+```golang
+package main
+
+import "fmt"
+
+func main() {
+   var c1, c2, c3 chan int
+   var i1, i2 int
+   select {
+      case i1 = <-c1:
+         fmt.Printf("received ", i1, " from c1\n")
+      case c2 <- i2:
+         fmt.Printf("sent ", i2, " to c2\n")
+      case i3, ok := (<-c3):  // same as: i3, ok := <-c3
+         if ok {
+            fmt.Printf("received ", i3, " from c3\n")
+         } else {
+            fmt.Printf("c3 is closed\n")
+         }
+      default:
+         fmt.Printf("no communication\n")
+   }    
+}
+// 输出结果：no communication
+```
+### Go语言循环语句
+#### for循环
+* 和 C++ 语言的 for 一样：<br>
+注意：
+	* init： 一般为赋值表达式，给控制变量赋初值；
+	* condition： 关系表达式或逻辑表达式，循环控制条件；
+	* post： 一般为赋值表达式，给控制变量增量或减量。
+```golang
+for init; condition; post { }
+```
+* 和 C++ 语言的 while 一样：
+```golang
+for condition { }
+```
+* 和 C++ 的 for(;;) 一样：
+```golang
+for { }
+```
+示例如下：
+```golang
+package main
+
+import "fmt"
+
+func main() {
+   var b int = 15
+   var a int
+   numbers := [6]int{1, 2, 3, 5} 
+   /* for 循环 */
+   for a := 0; a < 10; a++ {
+      fmt.Printf("a 的值为: %d\n", a)
+   }
+   for a < b {
+      a++
+      fmt.Printf("a 的值为: %d\n", a)
+   }
+   for i,x:= range numbers {
+      fmt.Printf("第 %d 位 x 的值 = %d\n", i,x)
+   }   
+}
+```
+### Go语言中的函数
+* Go语言函数定义格式如下所示：
+	* func：函数由 func 开始声明
+	* function_name：函数名称，函数名和参数列表一起构成了函数签名。
+	* parameter list]：参数列表，参数就像一个占位符，当函数被调用时，你可以将值传递给参数，这个值被称为实际参数。参数列表指定的是参数类型、	顺序、及参数个数。参数是可选的，也就是说函数也可以不包含参数。
+	* return_types：返回类型，函数返回一列值。return_types 是该列值的数据类型。有些功能不需要返回值，这种情况下 return_types 不是必须的。
+		函数体：函数定义的代码集合。
+```golang
+func function_name( [parameter list] ) ([return_types]) {
+   函数体
+}
+```
+* Go语言函数作为值：Go 语言可以很灵活的创建函数，并作为值使用。例如：
+```golang
+package main
+
+import (
+   "fmt"
+   "math"
+)
+
+func main(){
+   /* 声明函数变量 */
+   getSquareRoot := func(x float64) float64 {
+      return math.Sqrt(x)
+   }
+
+   /* 使用函数 */
+   fmt.Println(getSquareRoot(9))
+}
+```
+* 闭包：闭包是匿名函数，可以在动态编程中使用。
+	* 匿名函数是一个"内联"语句或表达式。匿名函数的优越性在于可以直接使用函数内的变量，不必申明。
+	* 以下实例中，我们创建了函数 getSequence() ，返回另外一个函数。该函数的目的是在闭包中递增 i 变量，代码如下：
+```golang
+
+```
