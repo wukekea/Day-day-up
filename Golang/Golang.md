@@ -493,5 +493,259 @@ func main(){
 	fmt.Println(book1)
 }
 ```
+### Go语言切片
+* Go语言切片是对数组的抽象
+* Go 数组的长度不可改变，在特定场景中这样的集合就不太适用，Go中提供了一种灵活，功能强悍的内置类型切片("动态数组"),与数组相比切片的长度是不固定的，可以追加元素，在追加时可能使切片的容量增大。
+* 切片(slice)是对数组一个连续片段的引用(该数组我们称之为相关数组，通常是匿名的)，所以切片是一个引用类型(因此更类似于 C/C++ 中的数组类型)。这个片段可以是整个数组，或者是由起始和终止索引标识的一些项的子集。需要注意的是，`终止索引标识的项不包括在切片内`。切片提供了一个相关数组的动态窗口。
+* 可以使用`len()`函数来获取切片或者数组的长度。
+* 给定项的切片索引可能比相关数组的相同元素的索引小。和数组不同的是，切片的长度可以在运行时修改，最小为 0 最大为相关数组的长度:切片是一个`长度可变的数组`。
+* 切片对象非常小，是因为它是只有3个字段的数据结构：`指向底层数组的指针`，`切片的长度`，`切片的容量`。这3个字段，就是Go语言操作底层数组的元数据，有了它们，我们就可以任意的操作切片了。
+* 定义切片的方法如下：
+```golang
+// 声明一个未指定大小的数组来定义切片：
+var slice1 []int
 
+// 或使用make()函数来创建切片:
+var slice2 []int = make([]int, len)
+
+// 也可以指定容量，其中capacity为可选参数。
+make([]T, length, capacity)
+```
+* 切片初始化
+```golang
+// 直接初始化切片，[]表示是切片类型，{1,2,3}初始化值依次是1,2,3.其cap=len=3
+s :=[] int {1,2,3 } 
+
+// 初始化切片s,是数组arr的引用
+s := arr[:] 
+
+// 将arr中从下标startIndex到endIndex-1 下的元素创建为一个新的切片
+s := arr[startIndex:endIndex] 
+
+// 缺省endIndex时将表示一直到arr的最后一个元素
+s := arr[startIndex:] 
+
+// 缺省startIndex时将表示从arr的第一个元素开始
+s := arr[:endIndex] 
+
+// 通过切片s初始化切片s1
+s1 := s[startIndex:endIndex] 
+
+// 通过内置函数make()初始化切片s,[]int 标识为其元素类型为int的切片
+s :=make([]int,len,cap) 
+```
+* len() 和 cap() 函数分别计算切片的当前长度和最大容量
+```golang
+package main
+
+import "fmt"
+
+func main() {
+   /* 创建切片 */
+   numbers := []int{0,1,2,3,4,5,6,7,8}   
+   printSlice(numbers)
+
+   /* 打印原始切片 */
+   fmt.Println("numbers ==", numbers)
+
+   /* 打印子切片从索引1(包含) 到索引4(不包含)*/
+   fmt.Println("numbers[1:4] ==", numbers[1:4])
+
+   /* 默认下限为 0*/
+   fmt.Println("numbers[:3] ==", numbers[:3])
+
+   /* 默认上限为 len(s)*/
+   fmt.Println("numbers[4:] ==", numbers[4:])
+
+   numbers1 := make([]int,0,5)
+   printSlice(numbers1)
+
+   /* 打印子切片从索引  0(包含) 到索引 2(不包含) */
+   number2 := numbers[:2]
+   printSlice(number2)
+
+   /* 打印子切片从索引 2(包含) 到索引 5(不包含) */
+   number3 := numbers[2:5]
+   printSlice(number3)
+}
+
+func printSlice(x []int){
+   fmt.Printf("len=%d cap=%d slice=%v\n",len(x),cap(x),x)
+}
+```
+* 如果想增加切片的容量，我们必须创建一个新的更大的切片并把原分片的内容都拷贝过来。<br>
+下面的代码描述了从拷贝切片的 copy 方法和向切片追加新元素的 append 方法。
+```golang
+package main
+
+import "fmt"
+
+func main() {
+   var numbers []int
+   printSlice(numbers)
+
+   /* 允许追加空切片 */
+   numbers = append(numbers, 0)
+   printSlice(numbers)
+
+   /* 向切片添加一个元素 */
+   numbers = append(numbers, 1)
+   printSlice(numbers)
+
+   /* 同时添加多个元素 */
+   numbers = append(numbers, 2,3,4)
+   printSlice(numbers)
+
+   /* 创建切片 numbers1 是之前切片的两倍容量*/
+   numbers1 := make([]int, len(numbers), (cap(numbers))*2)
+
+   /* 拷贝 numbers 的内容到 numbers1 */
+   copy(numbers1,numbers)
+   printSlice(numbers1)   
+}
+
+func printSlice(x []int){
+   fmt.Printf("len=%d cap=%d slice=%v\n",len(x),cap(x),x)
+}
+```
+### Go语言范围range
+* Go 语言中 range 关键字用于for循环中迭代数组(array)、切片(slice)、链表(channel)或集合(map)的元素。在数组和切片中它返回元素的索引值，在集合中返回 key-value 对的 key 值。
+```golang
+package main
+import "fmt"
+func main() {
+    //这是我们使用range去求一个slice的和。使用数组跟这个很类似
+    nums := []int{2, 3, 4}
+    sum := 0
+    for _, num := range nums {
+        sum += num
+    }
+    fmt.Println("sum:", sum)
+    //在数组上使用range将传入index和值两个变量。上面那个例子我们不需要使用该元素的序号，所以我们使用空白符"_"省略了。有时侯我们确实需要知道它的索引。
+    for i, num := range nums {
+        if num == 3 {
+            fmt.Println("index:", i)
+        }
+    }
+    //range也可以用在map的键值对上。
+    kvs := map[string]string{"a": "apple", "b": "banana"}
+    for k, v := range kvs {
+        fmt.Printf("%s -> %s\n", k, v)
+    }
+    //range也可以用来枚举Unicode字符串。第一个参数是字符的索引，第二个是字符（Unicode的值）本身。
+    for i, c := range "go" {
+        fmt.Println(i, c)
+    }
+}
+```
+### Go语言的Map（集合）
+* Map 是一种集合，所以我们可以像迭代数组和切片那样迭代它。不过，Map 是无序的，我们无法决定它的返回顺序，这是因为 Map 是使用 hash 表来实现的。
+* 定义Map方法如下：
+```golang
+/* 声明变量，默认 map 是 nil */
+var tmp map[string]string
+
+/* 使用 make 函数 */
+map_variable = make(map[int]string)
+```
+```golang
+package main
+
+import "fmt"
+
+func main() {
+   var countryCapitalMap map[string]string
+   /* 创建集合 */
+   countryCapitalMap = make(map[string]string)
+   
+   /* map 插入 key-value 对，各个国家对应的首都 */
+   countryCapitalMap["France"] = "Paris"
+   countryCapitalMap["Italy"] = "Rome"
+   countryCapitalMap["Japan"] = "Tokyo"
+   countryCapitalMap["India"] = "New Delhi"
+   
+   /* 使用 key 输出 map 值 */
+   for country := range countryCapitalMap {
+      fmt.Println("Capital of",country,"is",countryCapitalMap[country])
+   }
+   
+   /* 查看元素在集合中是否存在 */
+   captial, ok := countryCapitalMap["United States"]
+   /* 如果 ok 是 true, 则存在，否则不存在 */
+   if(ok){
+      fmt.Println("Capital of United States is", captial)  
+   }else {
+      fmt.Println("Capital of United States is not present") 
+   }
+}
+```
+* delete() 函数用于删除集合的元素, 参数为 map 和其对应的 key。实例如下：
+```golang
+package main
+
+import "fmt"
+
+func main() {   
+   /* 创建 map */
+   countryCapitalMap := map[string] string {"France":"Paris","Italy":"Rome","Japan":"Tokyo","India":"New Delhi"}
+   
+   fmt.Println("原始 map")   
+   
+   /* 打印 map */
+   for country := range countryCapitalMap {
+      fmt.Println("Capital of",country,"is",countryCapitalMap[country])
+   }
+   
+   /* 删除元素 */
+   delete(countryCapitalMap,"France");
+   fmt.Println("Entry for France is deleted")  
+   
+   fmt.Println("删除元素后 map")   
+   
+   /* 打印 map */
+   for country := range countryCapitalMap {
+      fmt.Println("Capital of",country,"is",countryCapitalMap[country])
+   }
+}
+```
+### Go语言类型转换
+```golang
+package main
+
+import "fmt"
+
+func main() {
+   var sum int = 17
+   var count int = 5
+   var mean float32
+   
+   mean = float32(sum)/float32(count)
+   fmt.Printf("mean 的值为: %f\n",mean)
+}
+```
+### Go语言接口
+```golang
+/* 定义接口 */
+type interface_name interface {
+   method_name1 [return_type]
+   method_name2 [return_type]
+   method_name3 [return_type]
+   ...
+   method_namen [return_type]
+}
+
+/* 定义结构体 */
+type struct_name struct {
+   /* variables */
+}
+
+/* 实现接口方法 */
+func (struct_name_variable struct_name) method_name1() [return_type] {
+   /* 方法实现 */
+}
+...
+func (struct_name_variable struct_name) method_namen() [return_type] {
+   /* 方法实现*/
+}
+```
 # 方法，select语句
