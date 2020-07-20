@@ -748,4 +748,86 @@ func (struct_name_variable struct_name) method_namen() [return_type] {
    /* 方法实现*/
 }
 ```
+### Go语言使用mongodb数据库
+* ORM：对象关系映射（Object Relational Mapping，简称ORM）是通过使用描述对象和数据库之间映射的元数据，将面向对象语言程序中的对象自动持久化到关系数据库中。本质上就是将数据从一种形式转换到另外一种形式。
+* gorm是go语言中实现数据库访问的ORM（对象关系映射）库。使用这个库，我们可以利用面向对象的方法，更加方便的对数据库中的数据进行CRUD(增删改查)。
+##### gorm的基本使用
+* 下载依赖
+```bash
+// 通过该语句可以查看GOPATH路径（环境变量设置修改），该路径即go get下载的依赖的存储路径
+go env
+
+// 下载的依赖位于：D:\Language\Go1.13.12\pkg\mod\github.com
+go get github.com/jinzhu/gorm
+// 下载gopkg.in/mgo.v2
+go get gopkg.in/mgo.v2
+// 引入gopkg.in/mgo.v2
+import "gopkg.in/mgo.v2"
+```
+* 使用方法
+```golang
+package main
+
+import (
+	"fmt"
+	"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
+	"log"
+)
+type Student struct {
+	Name			string 	`bson: "name"`
+	Age 			int		`bson: "age"`
+	Status 			int		`bson: "status"`
+	StudentNumber	string	`bson: "student_number"`
+}
+func main() {
+	mongo, err := mgo.Dial("127.0.0.1") // 建立连接
+	defer mongo.Close()
+	if err != nil {
+		log.Fatal("get one error: %v", err)
+	}
+	// 选择数据库和集合
+	client := mongo.DB("t").C("used")
+	data := Student {
+		Name:	"mongo",
+		Age:	18,
+		Status:	1,
+		StudentNumber: "1612899",
+	}
+	//插入数据
+	cErr := client.Insert(&data)
+	if cErr != nil {
+		log.Fatal("insert error:%v", cErr)
+	}
+
+	// 查找数据
+	user := Student{}
+	cErr2 := client.Find(bson.M{"studentnumber":"1612899"}).One(&user)
+	if cErr2 != nil {
+		log.Fatal("find error:%v", cErr2.Error())
+	}
+
+	// 查找所有数据 限制15条
+	iter := client.Find(bson.M{"age":18}).Sort("_id").Limit(15).Iter()
+	stu := Student{}
+	var stus []Student
+	for iter.Next(&stu) {
+		stus = append(stus, stu)
+	}
+
+	// 更新数据
+	// 该函数将只更新一条数据
+	cErr3 := client.Update(bson.M{"status":1}, bson.M{"$set":bson.M{"age":99}})
+	if cErr3 != nil {
+		log.Fatal("updata error:%v", cErr3)
+	}
+
+	// 删除数据
+	// 只会删除一条数据
+	client.Remove(bson.M{"status":1})
+
+	fmt.Println(stus)
+}
+```
+
 # 方法，select语句

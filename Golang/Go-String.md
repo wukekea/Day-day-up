@@ -1,5 +1,11 @@
 ### Go语言字符串处理函数
 * 使用字符串处理函数时需要导入`strings`包
+* Go语言中的string不能直接通过下标访问某个字符。比如：
+```golang
+// str[0]结果是'h'的ascii码
+// 可以使用string（）强制转换
+str := "helo"
+```
 * `Contains`:
 ```
 func Contains(s, str) bool
