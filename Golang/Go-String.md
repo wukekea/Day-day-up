@@ -173,5 +173,85 @@ func main(){
     num2, _ := strconv.ParseInt(str, 3, 8)
 	fmt.Println(num2)
 }
+```
 
+### 修改字符串
+* 在 Go 语言中，字符串的内容是不能修改的，也就是说，你不能用 s[0] 这种方式修改字符串中的 UTF-8 编码，如果你一定要修改，那么你可以将字符串的内容复制到一个可写的缓冲区中，然后再进行修改。这样的缓冲区一般是 []byte 或 []rune。如果要对字符串中的字节进行修改，则转换为 []byte 格式，如果要对字符串中的字符进行修改，则转换为 []rune 格式，转换过程会自动复制数据。<br>
+rune是Go语言中一种特殊的数据类型,它是int32的别名,几乎在所有方面等同于int32,用于区分字符值和整数值
+
+```golang
+package main
+import (
+    "fmt"
+)
+func main() {
+s := “Hello 世界！”
+b := []byte(s) // 转换为 []byte，自动复制数据
+b[5] = ‘,’ // 修改 []byte
+fmt.Printf("%s\n", s) // s 不能被修改，内容保持不变
+fmt.Printf("%s\n", b) // 修改后的数据
+}
+修改字符串中的字符（用 []rune）：
+func main() {
+s := “Hello 世界！”
+r := []rune(s) // 转换为 []rune，自动复制数据
+r[6] = ‘中’ // 修改 []rune
+r[7] = ‘国’ // 修改 []rune
+fmt.Println(s) // s 不能被修改，内容保持不变
+fmt.Println(string(r)) // 转换为字符串，又一次复制数据
+}
+```
+* 注意：对于一个字符：a := '0',这里的a是rune(int32)类型的；对于一个字符串：str := "0"，这里的str[0]是byte(uint8)类型的
+
+```golang
+package main
+
+import （
+    "fmt"
+    "unicode/utf8"
+)
+
+func main() {
+    var str = "hello 世界"
+    // len(str) = 12.
+    // 从字符串字面值看len(str)的结果应该是8,但在Golang中string类型的底层是通过byte数组实现的,
+    // 在unicode编码中,中文字符占两个字节,而在utf-8编码中,中文字符占三个字节而Golang的默认编码正是utf-8.
+    fmt.Println("len(str):", len(str))
+
+    // 如果想要获得真实的字符串长度而不是其所占用字节数,有两种方法实现
+    // 方法一, 使用unicode/utf8包中的RuneCountInString方法
+    fmt.Println("RuneCountInString:", utf8.RuneCountInString(str))
+
+    // 方法二，将字符串转换为rune类型的数组再计算长度
+    fmt.Println("rune:", len([]rune(str)))
+
+}
+```
+
+```golang
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+	str := "hello world, 科科"
+	fmt.Println(str)
+
+	for i := 0; i < len(str); i++ {
+		fmt.Printf("%c", str[i])
+	}
+	fmt.Println()
+
+	for _, i := range str {
+		fmt.Printf("%c", i)
+	}
+}
+
+// 输出结果为：
+// hello world, 科科
+// hello world, ç§ç§
+// hello world, 科科
+// 由此可知，str[i]是byte型，而使用range得到的是int32型
 ```

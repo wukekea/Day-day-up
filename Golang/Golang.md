@@ -1,7 +1,6 @@
 ```
 Ctrl + Shift + V进行预览
 ```
-
 ### Go语言结构
 * Go语言的基础组成有以下六个部分：`包声明`、`引入包`、`函数`、`变量`、`语句&表达式`、`注释`。一个基本的Go程序示例如下：
 ```golang
@@ -499,7 +498,31 @@ func main(){
 * 切片(slice)是对数组一个连续片段的引用(该数组我们称之为相关数组，通常是匿名的)，所以切片是一个引用类型(因此更类似于 C/C++ 中的数组类型)。这个片段可以是整个数组，或者是由起始和终止索引标识的一些项的子集。需要注意的是，`终止索引标识的项不包括在切片内`。切片提供了一个相关数组的动态窗口。
 * 可以使用`len()`函数来获取切片或者数组的长度。
 * 给定项的切片索引可能比相关数组的相同元素的索引小。和数组不同的是，切片的长度可以在运行时修改，最小为 0 最大为相关数组的长度:切片是一个`长度可变的数组`。
-* 切片对象非常小，是因为它是只有3个字段的数据结构：`指向底层数组的指针`，`切片的长度`，`切片的容量`。这3个字段，就是Go语言操作底层数组的元数据，有了它们，我们就可以任意的操作切片了。
+* 切片对象非常小，是因为它是只有3个字段的数据结构：`指向底层数组的指针`，`切片的长度`，`切片的容量`。这3个字段，就是Go语言操作底层数组的元数据，有了它们，我们就可以任意的操作切片了。注意，因为slice本身包含指针，所以slice的传递具有指针的性质。举个例子，将slice作为参数传递给函数时，如果在函数内修改了该slice的值，则函数外的slice也会相应的进行改变；而如果在函数内使用了append()函数进行修改，则该修改和位于append()后面的修改都不会对原来的slice造成影响。示例代码如下：
+```golang
+package main
+
+import (
+	"fmt"
+)
+
+func change(slice []int) {
+    // 该修改会影响到main中的slice,导致main中的slice[0] = 111
+	slice[0] = 111
+	for i := 0; i < 5; i++ {
+        使用了append函数
+		slice = append(slice, i)
+	}
+	slice[0] = 222
+}
+
+func main() {
+	var slice []int
+	slice = append(slice, 9)
+	change(slice)
+	fmt.Println(slice)
+}
+```
 * 定义切片的方法如下：
 ```golang
 // 声明一个未指定大小的数组来定义切片：
@@ -608,6 +631,71 @@ func printSlice(x []int){
    fmt.Printf("len=%d cap=%d slice=%v\n",len(x),cap(x),x)
 }
 ```
+* 清空切片可以使用一下几种方法：
+```golang
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+	slice := []int{1,2,3,4,5}
+	fmt.Printf("%v\n", slice)
+	println(slice)
+	fmt.Printf("======================\n")
+
+	// 清空slice
+	// 策略1
+	println("策略一：")
+	slice = slice[:0]
+	fmt.Printf("%v\n", slice)
+	println(slice)
+	fmt.Println()
+
+	fmt.Printf("再次访问原数组：\n")
+	slice = slice[:5]
+	fmt.Println(slice)
+	println(slice)
+	// 可以看出使用策略1并不会真正清空切片，只是将切片的长度变为1
+	// 切片的地址、容量以及原来储存的值均不变
+	fmt.Printf("======================\n")
+
+
+	// 策略2
+	println("策略2：")
+	slice = slice[:0:0]
+	fmt.Printf("%v\n", slice)
+	println(slice)
+	fmt.Println()
+
+	// slice = slice[:5]		// 无法再次访问原数组
+	slice = append(slice, 9)
+	fmt.Println(slice)
+	println(slice)
+	println("==========================\n")
+
+	// 策略二的slice在未追加元素前，虽然仍指向原数组，
+	// 但不能再访问原数组的元素。追加元素后，slice的地址也会改变，
+	// 也就是一个全新的数组。
+}
+```
+* 注意，对切片的赋值是地址传递。如下代码：
+```golang
+package main
+
+func main() {
+	a := []int{2,3,4}
+	// a与b地址相同
+	b := a
+	println(a)
+	println(b)
+	a[0]=111
+	// 输出111
+	println(b[0])
+}
+```
+
 ### Go语言范围range
 * Go 语言中 range 关键字用于for循环中迭代数组(array)、切片(slice)、链表(channel)或集合(map)的元素。在数组和切片中它返回元素的索引值，在集合中返回 key-value 对的 key 值。
 ```golang
@@ -829,5 +917,101 @@ func main() {
 	fmt.Println(stus)
 }
 ```
+### 按位与运算符的妙用
+* 对于一个数N，如果N = 2^n（N可以为负数），那么有N&(N-1) = 0；<br>
+因此，对任意一个N = 2^a1+2^a2+……+2^ak，N&(N-1) = N - 2^ak
+### 排序算法
+https://blog.csdn.net/sinat_26058371/article/details/86765055
 
+* 对于一些常用的类型（整数、浮点数、字符串），sort包直接提供了可排序的集合类型，和排序函数，
+```golang
+type IntSlice []int
+type Float64Slice []float64
+type StringSlice []string
+
+func Ints(a []int)           //整数排序
+func Float64s(a []float64)   //浮点数排序
+func Strings(a []string)     //字符串排序
+
+// 使用方法如下：
+var a sort.IntSlice = []int{3, 2, 4, 1}
+sort.Sort(a)
+fmt.Println(a)      //output: [1 2 3 4]
+// ------------------------------------
+// 或者：
+a := []int{3, 2, 4, 1}
+sort.Ints(a) 
+fmt.Println(a)      //output: [1 2 3 4]
+```
+
+### go语言生成随机数的方法
+* golang中产生随机数主要有两个包，分别是“math/rand”和“crypto/rand”。<br>
+“math/rand”的rand包实现了伪随机数生成器。<br>
+"crypto/rand"的rand包实现了用于加解密的更安全的随机数生成器。<br>
+```golang
+// 生成伪随机数
+package main
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
+func main() {
+	a := time.Now()
+	b := a.UnixNano()
+	fmt.Println(a)
+	fmt.Println(b)
+	// 随机种子
+	rand.Seed(b)
+	// 生成20个【0，100）范围的伪随机数
+	for i := 0; i < 20; i++ {
+		result := rand.Intn(100)
+		fmt.Println(result)
+	}
+}
+```
+```golang
+package main
+import (
+	"fmt"
+	"math/big"
+	"crypto/rand"
+)
+func main() {
+	// 生成20个【0，100）范围的真随机数
+	for i := 0; i < 20; i++ {
+		result, _ := rand.Int(rand.Reader, big.NewInt(100))
+		fmt.Println(result)
+	}
+}
+``` 
+### go语言从控制台输入语句的方法
+* 使用fmt包下的Scan()函数或者Scanf()函数。示例如下：
+```golang
+package main
+import (
+	"fmt"
+)
+func main() {
+	n, m := 0, 0
+	// 这两种方法读取的如果是字符串，则只会读取空格前面的字符串。
+	fmt.Scan(&n)
+	fmt.Scanf("%d", &m)
+}
+```
+* 使用bufio和os包
+```golang
+package main
+import (
+	"bufio"
+	"os"
+    "fmt"
+)
+func main() {
+	in := bufio.NewReader(os.Stdin)
+	// 得到的str是一个切片，里面的值是rune类型的ascii码。需要使用string()将其转换为字符串。
+	str, _, _ := in.ReadLine()
+	fmt.Println(string(str))
+}
+```
 # 方法，select语句
