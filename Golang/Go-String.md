@@ -109,6 +109,28 @@ func main() {
     fmt.Println(s)
 }
 ```
+* `TrimLeft`：去掉字符串左边指定的字符串
+```golang
+package main
+import ("fmt"; "strings")
+func main() {
+    str := "aaahelloaa"
+    s := strings.TrimLeft(str, "a")     // s = helloaa
+    fmt.Println(s)
+
+}
+```
+* `TrimRight`：去掉字符串右边指定的字符串
+```golang
+package main
+import ("fmt"; "strings")
+func main() {
+    str := "aaahelloaa"
+    s := strings.TrimRight(str, "a")     // s = aaahello
+    fmt.Println(s)
+
+}
+```
 * `Fields`
 ```
 func Fields(str) 切片
@@ -121,6 +143,46 @@ func main() {
     str1 := "    111  222  333 "
     slice := strings.Fields(str1)       // slice =  [111 222 333]
     fmt.Println(slice)
+}
+```
+* `HasPrefix`：判断字符串是否以指定的字符串开头，返回bool值
+```golang
+package main
+import ("fmt"; "strings")
+func main() {
+    str := "wkkhello"
+    s := strings.HasPrefix(str, "wkk")     // s = true
+    fmt.Println(s)
+}
+```
+* `HasSuffix`：判断字符串是否以指定字符串结尾，返回bool值
+```golang
+package main
+import ("fmt"; "strings")
+func main() {
+    str := "hellowkk"
+    s := strings.HasPrefix(str, "wkk")     // s = true
+    fmt.Println(s)
+}
+```
+* `ToUpper`：将字符串全部转换为大写
+```golang
+package main
+import ("fmt"; "strings")
+func main() {
+    str := "WKKhello"
+    s := strings.ToUpper(str)     // s = true
+    fmt.Println(s)
+}
+```
+* `ToLower`：将字符串全部转换为小写
+```golang
+package main
+import ("fmt"; "strings")
+func main() {
+    str := "WKKhello"
+    s := strings.ToLower(str)     // s = true
+    fmt.Println(s)
 }
 ```
 ### int型整数与string字符串的相互转换
