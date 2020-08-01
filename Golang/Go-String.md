@@ -238,7 +238,7 @@ func main(){
 ```
 
 ### 修改字符串
-* 在 Go 语言中，字符串的内容是不能修改的，也就是说，你不能用 s[0] 这种方式修改字符串中的 UTF-8 编码，如果你一定要修改，那么你可以将字符串的内容复制到一个可写的缓冲区中，然后再进行修改。这样的缓冲区一般是 []byte 或 []rune。如果要对字符串中的字节进行修改，则转换为 []byte 格式，如果要对字符串中的字符进行修改，则转换为 []rune 格式，转换过程会自动复制数据。<br>
+* 在 Go 语言中，字符串的内容是不能修改的，也就是说，不能用 s[0] 这种方式修改字符串中的 UTF-8 编码，如果一定要修改，那么我们可以将字符串的内容复制到一个可写的缓冲区中，然后再进行修改。这样的缓冲区一般是 []byte 或 []rune。如果要对字符串中的字节进行修改，则转换为 []byte 格式，如果要对字符串中的字符进行修改，则转换为 []rune 格式，转换过程会自动复制数据。<br>
 rune是Go语言中一种特殊的数据类型,它是int32的别名,几乎在所有方面等同于int32,用于区分字符值和整数值
 
 ```golang
@@ -316,4 +316,30 @@ func main() {
 // hello world, ç§ç§
 // hello world, 科科
 // 由此可知，str[i]是byte型，而使用range得到的是int32型
+```
+
+### unicode包中常用的函数，判断字符是否是字母、数字、空白符、标点字符 
+```golang
+package main
+import (
+	"fmt"
+	"unicode"
+)
+func main() {
+	// 判断是否为字母
+	fmt.Println(unicode.IsLetter('A'))	// trur
+
+	// 判断是否为十进制数字
+	fmt.Println(unicode.IsDigit('1'))	// true
+
+	// 判断是否为数字
+	fmt.Println(unicode.IsNumber('2'))	// true
+
+	// 判断是否为空白符号
+	fmt.Println(unicode.IsSpace(' '))	// true
+
+	// 判断是否为Unicode标点符号
+    fmt.Println(unicode.IsPunct(','))	// true
+    fmt.Println(unicode.IsPunct('$'))	//false  ????????????????
+}
 ```

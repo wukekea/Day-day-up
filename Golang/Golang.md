@@ -1014,4 +1014,127 @@ func main() {
 	fmt.Println(string(str))
 }
 ```
+### Go工具的使用
+* go默认已经有了gofmt工具，但是强烈建议使用goimport工具，这个在gofmt的基础上增加了自动删除和引入包.<br>
+如果使用GoLand，则可采用其默认的格式化
+```bash
+go get golang.org/x/tools/cmd/goimports
+```
+
+vet工具可以帮我们静态分析我们的源码存在的各种问题，例如多余的代码，提前return的逻辑，struct的tag是否符合标准等。
+```bash
+go get golang.org/x/tools/cmd/vet
+```
+使用如下：
+```bash
+go vet .
+```
+
+* 大陆不能访问golang.org，所以使用 go get golang.org/x/xxx 包的时候都会失败<br>
+可以手动下载的方式解决，golang.org/x所有包都在GitHub有镜像：https://github.com/golang/tools
+
+
+* GO学习中有用的网址
+```
+// 使用go get下载某些依赖包时由于墙的原因下载不下来，需要网络代理
+https://goproxy.io/zh/				GO模块的全球代理
+
+```
+
+* gin框架配置swagger自动生成文档
+	* swagger使用手册参见：https://swaggo.github.io/swaggo.io/declarative_comments_format/general_api_info.html
+	* 下载安装swagger（此处可能需要配置网络代理，并在power shell下执行下列命令）
+		```
+		go get -u github.com/swaggo/swag/cmd/swag
+		go get -u github.com/swaggo/gin-swagger
+		go get -u github.com/swaggo/files
+		go get -u github.com/alecthomas/template
+		```
+	* gin中router代码需要修改的地方：
+		```
+		import (
+			// 相应的包的路径
+			_ "modulename/docs"
+			"github.com/gin-gonic/gin"
+			"github.com/swaggo/gin-swagger"
+			"github.com/swaggo/gin-swagger/swaggerFiles"
+		)
+
+		func InitHttpServer() {
+			var router *gin.Engine
+			router = gin.Default()
+			router.Static("/html", "./public")
+	
+			// 重要。这条语句相当与添加一个接口，以便浏览器访问
+			router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+			router.Run(":" + _const.HTTP_SERVER_PORT)
+		}
+		```
+	* api接口的注释：<br>
+	一定要注意在方法上添加的注释，如果不规范，swagger不会识别<br>
+	标准注释如：https://swaggo.github.io/swaggo.io/declarative_comments_format/general_api_info.html
+		```
+		// @Summary 根据条件查询实例
+		// @Description 根据条件查询实例
+		// @Accept  json
+		// @Produce  json
+		// @Param   pageNum     path    int     true        "pageNum"
+		// @Param expName body string false "expName"
+		// @Param expType body string false "expType"
+		// @Param expTrade body string false "expTrade"
+		// @Param expScene body string false "expScene"
+		// @Param expRemark body string false "expRemark"
+		// @Param expDeg body int false "expDeg"
+		// @Param expCreateUser body string false "expCreateUser"
+		// @Success 200 {string} json "{"errcode":"200","data":"[{"expId":"111","expName":"TensorFlow","expType":"TensorFlow","expTrade":"制造业","expScene":"零售","expRemark":"零售零售零售零售","expDeg":"2","expCreateUser":"tfg"}]","msg":""}"
+		// @Failure 400 {string} json "{"errcode":"400","data":"","msg":"error......"}"
+		// @Router /api/v1/exp/list/{pageNum} [post]
+		func ListExp(c *gin.Context){
+			pageNum,err := strconv.Atoi(c.Param("pageNum"))
+			if err != nil {
+				rltStr := util.Rltjson( _const.SERVICE_FAIL_CODE,err.Error(),"")
+				c.String(http.StatusBadRequest, rltStr)
+				return
+			}
+		}
+		```
+	* main.go的注释
+		```golang
+		// @title App后端接口
+		// @version 1.0
+		// @description App后端
+		// @host 127.0.0.1:8989			// 需要跟api的访问接口相同
+		// @BasePath /
+		```
+	* 接着在命令行执行swag init
+		```
+		PS D:\Job\project\app-service> swag init
+		2020/07/30 21:40:04 Generate swagger docs....
+		2020/07/30 21:40:04 Generate general API Info, search dir:./
+		2020/07/30 21:40:04 Generating appinterface.DeviceAliasParam
+		2020/07/30 21:40:04 create docs.go at docs/docs.go
+		2020/07/30 21:40:04 create swagger.json at docs/swagger.json
+		2020/07/30 21:40:04 create swagger.yaml at docs/swagger.yaml
+		```
+	* 然后就就可以在浏览器中访问了：<br>
+	http://localhost:8989/swagger/index.html<br>
+	其中的端口号同其它接口的端口号。
+
+* Go语言中常见的类型占用的内存大小
+```golang
+var a int8			// 8/8=1字节
+var b int 32		// 32/8=4字节
+var c int			// 比较特殊，，int占位多少取决于CPU。在32位CPU中占4字节，64位占8字节
+// go语言的string本质上是一个结构体
+// type StringHeader struct {
+//         Data uintptr
+//         Len  int
+// }
+// uintptr和int在64位cpu下都占8字节，一共16字节。
+var d string		// 16字节
+var e bool 			// 1字节
+var f float32		// 32/8=4字节
+var g float64		// 64/8=8字节
+```
 # 方法，select语句
