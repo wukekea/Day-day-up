@@ -62,9 +62,18 @@
     -bash: TEST: readonly variable 
     ```
 
+
     * 环境变量的设置位于/etc/profile文件 
     * 如果需要增加新的环境变量可以添加下属行 
     * export path=$path:/path1:/path2:/pahtN 
 
 * 安装好的centos系统默认是没有中文输入法的，只能输入英文字符。需要手动添加。方法如下<br>
-设置 -> 语言 -> 
+设置 -> 语言 -> （添加失败）
+
+* linux系统常用的shell命令<br>
+1，复制文件：cp -a app-package-manager /root/Documents/app-package-manager<br>
+2，新建文件夹：mkdir file<br>
+3，新建文件：touch a.txt<br>
+4，删除文件：rm -i filename
+5，删除文件夹：rm -ir filedir
+6，直接删除文件夹（不询问）：rm -rf filedir
